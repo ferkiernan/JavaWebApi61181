@@ -3,6 +3,8 @@ package com.educacionit.implementaciones.MariaDB;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.educacionit.entidades.Usuario;
@@ -19,13 +21,20 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	private PreparedStatement psListarUsuarios;
 	
 	private final String insertQuery = "insert into usuarios (correo, clave, fechaCreacion, fechaModificacion) values (?, AES_ENCRYPT(?,?),?,?)";
+	private final String modificarQuery = "update usuarios set clave = AES_ENCRYPT(?,?), fechaModificacion = ?  where correo = ?";
+	private final String eliminarQuery = "delete from usuarios where correo = ?";
 	private final String buscarUsuarioIdQuery = "select AES_DECRYPT(clave,?) as clave, fechaCreacion, fechaModificacion from usuarios where correo=?";
+	private final String listarQuery = "select correo, AES_DECRYPT(clave,?) as clave, fechaCreacion,fechaModificacion from usuarios";
+	
 	
 	public UsuarioImpl() {
 		super();
 		try {
 			psInsertar = getConection().prepareStatement(insertQuery);
 			psBuscarPorId = getConection().prepareStatement(buscarUsuarioIdQuery);
+			psListarUsuarios = getConection().prepareStatement(listarQuery);
+			psEliminar =  getConection().prepareStatement(eliminarQuery);
+			psModificar = getConection().prepareStatement(modificarQuery);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -50,16 +59,33 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	
 
 	@Override
-	public boolean modificar(Usuario e) {
-		// TODO Auto-generated method stub
+	public boolean modificar(Usuario usuario) {
+		try {
+			psModificar.setString(1, usuario.getClave());
+			psModificar.setString(2, getKEY());
+			psModificar.setString(3, Fechas.getStringFromLocalDateTime(LocalDateTime.now()));
+			psModificar.setString(4, usuario.getCorreo());
+
+			return psModificar.executeUpdate() == 1;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
 	@Override
-	public boolean eliminar(Usuario e) {
-		// TODO Auto-generated method stub
+	public boolean eliminar(Usuario usuario) {
+		try {
+			psEliminar.setString(1, usuario.getCorreo());
+			return psEliminar.executeUpdate() == 1; // 0 1 si no lo eliminio
+	
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
+	
 
 	@Override
 	public Usuario buscarPorId(String correo) {
@@ -85,8 +111,27 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 
 	@Override
 	public List<Usuario> listar() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Usuario> usuarios = new ArrayList<>();
+
+		try {
+			
+			psListarUsuarios.setString(1, getKEY());
+			ResultSet resultSet = psListarUsuarios.executeQuery();
+
+			while (resultSet.next()) {
+				Usuario usuario = new Usuario();
+				usuario.setCorreo(resultSet.getString("correo"));
+				usuario.setClave(resultSet.getString("clave"));
+				usuario.setFechaCreacion(Fechas.getLocalDateFromString(resultSet.getString("fechaCreacion")));
+				usuario.setFechaModificacion(Fechas.getLocalDateTimeFromString(resultSet.getString("fechaModificacion")));
+				usuarios.add(usuario);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return usuarios;
 	}
 
 }
