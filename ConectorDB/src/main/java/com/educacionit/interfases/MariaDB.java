@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public interface MariaDB {
-	InputStream inputStremConfig = ClassLoader.getSystemResourceAsStream("database.properties");
+	//InputStream inputStremConfig = ClassLoader.getSystemResourceAsStream("database.properties");
+	InputStream inputStremConfig = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties");
 	Properties properties = new Properties();
 	
 	

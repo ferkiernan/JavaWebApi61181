@@ -14,10 +14,17 @@ public class App
 {
     public static void main( String[] args )
     {
-       Usuario user1 = new Usuario("user1@educacionit.com", "1234", Fechas.getLocalDateFromString("1981-01-11"), LocalDateTime.now());
+       Usuario user2 = new Usuario("user2@educacionit.com", "passwordloca", Fechas.getLocalDateFromString("1981-02-22"), LocalDateTime.now());
        
        UsuarioImpl usuarioImpl = new UsuarioImpl();
        
-       usuarioImpl.insertar(user1);
+       usuarioImpl.insertar(user2);
+       
+       Usuario usuarioRecuperado = usuarioImpl.buscarPorId("user1@educacionit.com");
+       
+       System.out.println(usuarioRecuperado);
+       
+       
+       
     }
 }

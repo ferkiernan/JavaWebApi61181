@@ -4,15 +4,23 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Usuario {
+	
 	private String correo;
 	private String clave;
 	private LocalDate fechaCreacion = LocalDate.now();;
 	private LocalDateTime fechaModificacion;
 	
+	
+	
 	public Usuario() {
 		super();
 	}
 	
+	@Override
+	public String toString() {
+		return "Usuario [correo=" + correo + ", clave=" + clave + ", fechaCreacion=" + fechaCreacion
+				+ ", fechaModificacion=" + fechaModificacion + "]";
+	}
 	public Usuario(String correo, String clave, LocalDate fechaCreacion, LocalDateTime fechaModificacion) {
 		super();
 		this.correo = correo;

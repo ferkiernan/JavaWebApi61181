@@ -1,14 +1,14 @@
 package com.educacionit.implementaciones.MariaDB;
 
-import com.educacionit.interfases.DAO;
-import com.educacionit.interfases.MariaDB;
-import com.educacionit.utilidades.Fechas;
-
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.educacionit.entidades.*;
+import com.educacionit.entidades.Usuario;
+import com.educacionit.interfases.DAO;
+import com.educacionit.interfases.MariaDB;
+import com.educacionit.utilidades.Fechas;
 
 public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	
@@ -19,11 +19,13 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	private PreparedStatement psListarUsuarios;
 	
 	private final String insertQuery = "insert into usuarios (correo, clave, fechaCreacion, fechaModificacion) values (?, AES_ENCRYPT(?,?),?,?)";
+	private final String buscarUsuarioIdQuery = "select AES_DECRYPT(clave,?) as clave, fechaCreacion, fechaModificacion from usuarios where correo=?";
 	
 	public UsuarioImpl() {
 		super();
 		try {
 			psInsertar = getConection().prepareStatement(insertQuery);
+			psBuscarPorId = getConection().prepareStatement(buscarUsuarioIdQuery);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -44,6 +46,8 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 		}
 		return false;
 	}
+	
+	
 
 	@Override
 	public boolean modificar(Usuario e) {
@@ -58,9 +62,25 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	}
 
 	@Override
-	public Usuario buscarPorId(String k) {
-		// TODO Auto-generated method stub
-		return null;
+	public Usuario buscarPorId(String correo) {
+		Usuario usuario = new Usuario();
+		try {
+			psBuscarPorId.setString(1, getKEY());
+			psBuscarPorId.setString(2, correo);
+			
+			ResultSet rs = psBuscarPorId.executeQuery();
+			
+			if (rs.next()) {
+				
+				usuario.setCorreo(correo);
+				usuario.setClave(rs.getString("clave"));
+				usuario.setFechaCreacion(Fechas.getLocalDateFromString(rs.getString("fechaCreacion")));
+				usuario.setFechaModificacion(Fechas.getLocalDateTimeFromString(rs.getString("fechaModificacion")));			
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return usuario;
 	}
 
 	@Override
