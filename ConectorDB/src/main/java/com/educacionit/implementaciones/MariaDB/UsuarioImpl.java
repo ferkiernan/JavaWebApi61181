@@ -3,6 +3,7 @@ package com.educacionit.implementaciones.MariaDB;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +47,8 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 			psInsertar.setString(1, usuario.getCorreo());
 			psInsertar.setString(2, usuario.getClave());
 			psInsertar.setString(3, getKEY());
-			psInsertar.setString(4, Fechas.getStringFromLocalDate(usuario.getFechaCreacion()));
-			psInsertar.setString(5, Fechas.getStringFromLocalDateTime(usuario.getFechaModificacion()));
+			psInsertar.setString(4, Fechas.getStringFromLocalDate(LocalDate.now()));
+			psInsertar.setString(5, Fechas.getStringFromLocalDateTime(LocalDateTime.now()));
 			
 			return (psInsertar.executeUpdate() == 1);
 		} catch (SQLException e) {
@@ -78,7 +79,7 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	public boolean eliminar(Usuario usuario) {
 		try {
 			psEliminar.setString(1, usuario.getCorreo());
-			return psEliminar.executeUpdate() == 1; // 0 1 si no lo eliminio
+			return (psEliminar.executeUpdate() == 1); // 0 1 si no lo eliminio
 	
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -90,6 +91,7 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 	@Override
 	public Usuario buscarPorId(String correo) {
 		Usuario usuario = new Usuario();
+		boolean encontro = false;
 		try {
 			psBuscarPorId.setString(1, getKEY());
 			psBuscarPorId.setString(2, correo);
@@ -97,16 +99,20 @@ public class UsuarioImpl implements DAO<String, Usuario>, MariaDB {
 			ResultSet rs = psBuscarPorId.executeQuery();
 			
 			if (rs.next()) {
-				
+				encontro = true;
 				usuario.setCorreo(correo);
 				usuario.setClave(rs.getString("clave"));
 				usuario.setFechaCreacion(Fechas.getLocalDateFromString(rs.getString("fechaCreacion")));
 				usuario.setFechaModificacion(Fechas.getLocalDateTimeFromString(rs.getString("fechaModificacion")));			
 			}
+			if (encontro) {
+				return usuario;
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return usuario;
+		return null;
 	}
 
 	@Override

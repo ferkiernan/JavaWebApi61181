@@ -5,15 +5,17 @@ import java.util.List;
 import com.educacionit.DTOs.UsuarioDTO;
 import com.educacionit.entidades.Usuario;
 
+import jakarta.ws.rs.core.Response;
+
 public interface IUsuario {
 	
-	List<Usuario> listar();
+	List<UsuarioDTO> listar();
 	
-	UsuarioDTO guardar(Usuario usuario);
+	Response guardar(UsuarioDTO usuarioDto);
 	
-	UsuarioDTO eliminar(Usuario usuario);
+	Response eliminar(UsuarioDTO usuarioDto);
 	
-	UsuarioDTO buscarPorId(String correo);
+	Response buscarPorId(String correo);
 	
 	UsuarioDTO fromUsuario(Usuario usuario, String mensaje);
 	
